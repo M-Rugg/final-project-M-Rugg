@@ -1,6 +1,6 @@
 ---
-title: Project title
-author: by your name
+title: National Park Species
+author: Moriah Ruggerio
 output: github_document
 ---
 
