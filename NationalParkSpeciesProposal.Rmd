@@ -34,11 +34,22 @@ Determine what variables to remove to keep it between 10-20:
 most_visited_nps_species_data_cleaned <- most_visited_nps_species_data_cleaned %>%
   filter(taxon_record_status == "Active", park_accepted == TRUE) %>%  #only includes data with active taxons, and accepted in park status
   #count(taxon_record_status)
-  select(park_name:family, sci_name, common_names, sensitive, occurrence:abundance, references:vouchers, te_status:s_rank) # removes empty and exluded rows to keep the variables within range
+  select(park_name:family, sci_name, common_names, occurrence:abundance, references:vouchers, te_status:s_rank) #%>% # removes empty and exluded rows to keep the variables within range
   #count(taxon_record_status, park_accepted)
+  
 #no data in synonyms, external_links
+#all data is not sensitive (remove variable)
 #combine nativeness_tabs with native & same with occurrence and occurrence_tags
 #remove park_tags
 #remove inactive taxons (including data rows)
 #only include park accepted/remove the row and record status
+```
+
+``` {r}
+write_csv(most_visited_nps_species_data_cleaned, file = "data/most_visited_nps_species_data_cleaned.csv")
+```
+
+``` {r}
+most_visited_nps_species_data_cleaned %>%
+  count(nativeness)
 ```
