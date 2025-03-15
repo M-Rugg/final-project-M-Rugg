@@ -1,0 +1,44 @@
+---
+title: "Final Project Proposal"
+subtitle: "National Park Species"
+author: "Moriah Ruggerio"
+output: 
+  tufte::tufte_html:
+    tufte_variant: "envisioned"
+    highlight: pygments
+    css: ../lab.css
+link-citations: true
+---
+
+
+```{r setup, include=FALSE}
+#knitr::opts_chunk$set(eval = TRUE)
+
+library(tidyverse)
+```
+
+# Import the data:
+```{r}
+most_visited_nps_species_data <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2024/2024-10-08/most_visited_nps_species_data.csv')
+
+```
+
+``` {r tidydata}
+most_visited_nps_species_data_cleaned <- most_visited_nps_species_data %>%
+  janitor::clean_names()
+```
+
+Determine what variables to remove to keep it between 10-20:
+```{r}
+
+most_visited_nps_species_data_cleaned <- most_visited_nps_species_data_cleaned %>%
+  filter(taxon_record_status == "Active", park_accepted == TRUE) %>%  #only includes data with active taxons, and accepted in park status
+  #count(taxon_record_status)
+  select(park_name:family, sci_name, common_names, sensitive, occurrence:abundance, references:vouchers, te_status:s_rank) # removes empty and exluded rows to keep the variables within range
+  #count(taxon_record_status, park_accepted)
+#no data in synonyms, external_links
+#combine nativeness_tabs with native & same with occurrence and occurrence_tags
+#remove park_tags
+#remove inactive taxons (including data rows)
+#only include park accepted/remove the row and record status
+```
