@@ -1,6 +1,6 @@
-Project title
+National Park Species
 ================
-by your name
+Moriah Ruggerio
 
 ## Summary
 
