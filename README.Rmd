@@ -33,6 +33,10 @@ Include a citation for your data here.
 See http://libraryguides.vu.edu.au/c.php?g=386501&p=4347840 for guidance on proper citation for datasets. 
 If you got your data off the web, make sure to note the retrieval date.
 
+NPSpecies - The National Park Service biodiversity database. **https://irma.nps.gov/npspecies/. Accessed September 2nd, 2024 **
+
+**This data was accessed from https://github.com/rfordatascience/tidytuesday/blob/main/data/2024/2024-10-08/readme.md on March 15, 2025.**
+
 ## References
 
 List any references here. You should, at a minimum, list your data source.
