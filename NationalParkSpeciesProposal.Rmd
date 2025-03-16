@@ -3,6 +3,8 @@ title: "Final Project Proposal"
 subtitle: "National Park Species"
 author: "Moriah Ruggerio"
 output:
+  pdf_document:
+    latex_engine: xelatex
   tufte::tufte_html:
     tufte_variant: "envisioned"
     highlight: pygments
@@ -58,7 +60,7 @@ most_visited_nps_species_data_cleaned %>%
 
 This project uses the dataset `most_visited_nps_species_data_cleaned`. The National Park Service (NPS) keeps a list of every species found within each national park. The data used in this project is originally from the National Park Species List. It can be accessed here: https://irma.nps.gov/NPSpecies/Search/SpeciesList. Due to the massive size of this dataset, it was restricted to the top 15 most popular national parks by  `f. hull`  in the `tidytuesday` git repository on September 2, 2024. This reduced dataset (`most_visited_nps_species_data`) was accessed on March 15, 2025 from https://github.com/rfordatascience/tidytuesday/blob/main/data/2024/2024-10-08/readme.md. Since this dataset originally had too many for the confines of this assignment, I restricted the scope of the data further. Only included in this projects' dataset (`most_visited_nps_species_data_cleaned`)  are species whose presence in the park has been approved by the NPS, have an active taxon (current scientific name), and a non-sensitive species status. Data on sensitive species is removed from all public access by the NPS to protect endangered or fragile species in national parks. 
 
-The dataset has `r nrow(most_visited_nps_species_data_cleaned)` rows and `r ncol(most_visited_nps_species_data_cleaned)` variables. Each row is a specific species found in one of the parks. The variables are. (See `README.md` for variable descriptions. The intent of this research project is to examine if there is trends between biodiversity and the popularity of a park. Some specific research questions to be examined are: (1) Do more popular parks have higher observations of mammals (and other species)? (2)  Are there more native species seen in popular parks than invasives or introduced? (3) Does the amount of different species found in the park follow the popularity of the park (where more species are found in the more popular parks) the top 15 national parks.
+The dataset has `r nrow(most_visited_nps_species_data_cleaned)` rows and `r ncol(most_visited_nps_species_data_cleaned)` variables. Each row is a specific species found in one of the parks. The variables are `park_name`, `category_name`, `order`, `family`, `sci_name`, `common_names`, `occurrence`, `occurrence_tags`, `nativeness`, `nativeness_tags`, `abundance`, `references`, `observations`, `vouchers`, `te_status`, `state_status`, `ozone_sensitive_status`, `g_rank`, `s_rank`. (See `README.md` for variable descriptions. The intent of this research project is to examine if there is trends between biodiversity and the popularity of a park. Some specific research questions to be examined are: (1) Do more popular parks have higher observations of birds (and other classes)? (2)  Are there more native species seen in popular parks than invasives or introduced?
 
 # Data
 
@@ -67,3 +69,34 @@ glimpse(most_visited_nps_species_data_cleaned)
 
 skim(most_visited_nps_species_data_cleaned)
 ```
+
+# Data Analysis Plan
+
+*Predictor, Outcome Variables, and Comparison Groups:*
+(1) For the first question, the predictor variable will be `evidences` (sum of `observations`, `references`, and `vouchers`) while the outcome will be `park_name` (ordered as a factor by popularity). This will be compared across each `category_name`.
+
+(2) For the second question the predictor variable will be `nativeness` and the outcome vairable will be `park_name` (again ordered as a factor by park popularity).
+
+```{r}
+
+most_visited_nps_species_data_cleaned %>% 
+  filter(observations < 100) %>% # split between 2 graphs as the data was too squished
+  ggplot(aes(x = observations)) +
+  geom_histogram() +
+  ggtitle("Distribution of Observations") + labs(subtitle = "Observations < 100")
+
+most_visited_nps_species_data_cleaned %>% 
+  filter(observations > 100) %>%
+  ggplot(aes(x = observations)) +
+  geom_histogram() +
+  ggtitle("Distribution of Observations") + labs(subtitle = "Observations > 100")
+
+most_visited_nps_species_data_cleaned %>%
+  group_by(park_name, category_name) %>%
+  summarise(sum(observations), sum(references), sum(vouchers, mean(observations), mean(references), mean(vouchers)))
+```
+
+The summary statistics help show that the amount of observations, references, and vouchers vary between parks and among the categories. The observations graphs show that there is a lot of variation in the number of observations between all the parks. It may be interesting to investigate if a particular category or park has the massive amount of observations.
+
+# Methods
+To test my questions I first would need to convert `park_name` into a factor (ordered by popularity). Then I would need to create another variable `evidences` as the sum of `observations`, `references`, and `vouchers`. It may then be helpful to create a graphic and factor by `park_name` and compare the most commonly "evidenced" categories across each park. If data follows the hyposthesized patterns, for each category `evidences` will be higher in the most popular parks. I would also want to create graphics that look at the number of different species within each park. This would be grouped by `nativeness`. If the data follows the hypothesized assotiation, parks with higher ratios of nativness will be more popular.
