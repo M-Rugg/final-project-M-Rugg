@@ -1,14 +1,16 @@
 ---
 title: "Final Project Proposal"
-subtitle: "National Park Species"
 author: "Moriah Ruggerio"
+subtitle: National Park Species
 output:
-  pdf_document:
-    latex_engine: xelatex
+  html_document:
+    df_print: paged
   tufte::tufte_html:
-    tufte_variant: "envisioned"
+    tufte_variant: envisioned
     highlight: pygments
     css: ../lab.css
+  pdf_document:
+    latex_engine: xelatex
 link-citations: true
 ---
 
@@ -100,3 +102,20 @@ The summary statistics help show that the amount of observations, references, an
 
 # Methods
 To test my questions I first would need to convert `park_name` into a factor (ordered by popularity). Then I would need to create another variable `evidences` as the sum of `observations`, `references`, and `vouchers`. It may then be helpful to create a graphic and factor by `park_name` and compare the most commonly "evidenced" categories across each park. If data follows the hyposthesized patterns, for each category `evidences` will be higher in the most popular parks. I would also want to create graphics that look at the number of different species within each park. This would be grouped by `nativeness`. If the data follows the hypothesized assotiation, parks with higher ratios of nativness will be more popular.
+
+``` {r}
+park_popularity <- c("Great Smoky Mountains", "Grand Canyon", "Zion", "Yellowstone", "Rocky Mountain", "Yosemite", "Acadia", "Grand Teton", "Joshua Tree", "Olympic", "Glacier", "Cuyahoga Valley", "Indiana Dunes", "Hot Springs", "Bryce Canyon")
+
+#park attendance data from: 
+#  Ard, A. J. (2024, June 10). These are the top 15 most visited national parks in the U.S. see which ranked no. 1. USA Today. https://www.usatoday.com/picture-gallery/travel/news/2024/06/10/what-is-the-most-visited-national-park-in-the-us-see-the-top-15/74049474007/ 
+
+most_visited_nps_species_data_cleaned <- most_visited_nps_species_data_cleaned %>%
+  mutate(
+    park_name = gsub("National Park", "", park_name), # removed "National Park" in park_name since it is redundant
+    park_name = factor(park_name, labels = park_popularity) # creates a factor
+    ) #%>% 
+  #count(park_name)       # checks order
+
+most_visited_nps_species_data_cleaned %>%
+  filter(!is.na(nativeness_tags))  # may want to combine nativeness with nativeness_tags
+```
