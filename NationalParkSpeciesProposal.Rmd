@@ -19,6 +19,7 @@ link-citations: true
 
 library(tidyverse)
 library(skimr)
+library(infer)
 ```
 
 # Import the data:
@@ -118,4 +119,74 @@ most_visited_nps_species_data_cleaned <- most_visited_nps_species_data_cleaned %
 
 most_visited_nps_species_data_cleaned %>%
   filter(!is.na(nativeness_tags))  # may want to combine nativeness with nativeness_tags
+```
+```{r}
+most_visited_nps_species_data_cleaned <- most_visited_nps_species_data_cleaned%>%
+  mutate(evidences = rowSums(across(c(vouchers, observations, references)), na.rm = TRUE))
+```
+
+```{r}
+most_visited_nps_species_data_cleaned %>%
+  count(category_name) %>%
+  arrange(-n)
+
+most_visited_nps_species_data_cleaned %>%
+  group_by(category_name) %>%
+  summarise(sum_evidences = sum(evidences)) %>%
+  arrange(-sum_evidences)
+
+most_visited_nps_species_data_cleaned %>%
+  filter(category_name == "Vascular Plant")%>%
+  group_by(park_name) %>%
+  summarise(sum_evidences = sum(evidences)) %>%
+  arrange(park_name)
+
+most_visited_nps_species_data_cleaned %>%
+  group_by(category_name) %>%
+  summarise(sum_observations = sum(observations)) %>%
+  arrange(-sum_observations)
+```
+```{r nativeness}
+
+
+#mutate nativeness -> native/non-native
+#delete nativeness_tags -> invasive, native, non-native
+
+most_visited_nps_species_data_cleaned <- most_visited_nps_species_data_cleaned%>%
+  mutate(nativeness = if_else(nativeness == "Unknown", NA, nativeness)) #nativeness = if_else(nativeness_tags == "Invasive" | nativeness_tags == "Invasive, Noxious", "Invasive", nativeness)))             #will not use invasives since not enough present with the tag
+
+
+most_visited_nps_species_data_cleaned %>%
+  count(nativeness, park_name) %>%
+  arrange(park_name)# look at types
+```
+``` {r}
+number_nativness_df <- most_visited_nps_species_data_cleaned %>%
+  group_by(park_name) %>%            # groups by park
+  filter(!is.na(nativeness)) %>%     #removes NA
+  count(nativeness)
+
+```
+```{r}
+number_nativness_df <- 
+  number_nativness_df %>%
+  group_by(park_name) %>%
+  mutate(native_prop = n/sum(n)) %>%
+  mutate(group = if_else(park_name =="Great Smoky Mountains" | park_name == "Grand Canyon" | park_name == "Zion" | park_name == "Yellowstone" | park_name == "Rocky Mountain", "top5", 
+                         if_else(park_name =="Glacier" | park_name == "Cuyahoga Valley" | park_name == "Indiana Dunes" | park_name == "Hot Springs" | park_name == "Bryce Canyon", "bottom5", "middle")))
+```
+``` {r hypothesis_nativeness}
+set.seed(221)
+null_dist_nativeness <- number_nativness_df %>%
+  filter(group != "middle") %>%
+ specify(response = nativeness, explanatory = group,
+ success = "Native") %>%
+ hypothesize(null = "independence") %>%
+ generate(100, type = "bootstrap") %>%
+ calculate(stat = "diff in props",
+ order = c("top5", "bottom5"))
+
+ggplot(null_dist_nativeness, mapping = aes(x = stat)) +
+ geom_histogram(binwidth = 0.05) +
+ labs(title = "Null distribution")
 ```
