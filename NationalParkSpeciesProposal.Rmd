@@ -161,32 +161,151 @@ most_visited_nps_species_data_cleaned %>%
   arrange(park_name)# look at types
 ```
 ``` {r}
-number_nativness_df <- most_visited_nps_species_data_cleaned %>%
+number_nativness_df <- 
+  most_visited_nps_species_data_cleaned %>%
   group_by(park_name) %>%            # groups by park
   filter(!is.na(nativeness)) %>%     #removes NA
-  count(nativeness)
+  select(park_name, category_name, nativeness) %>%
+  count(nativeness) %>%
+  mutate(native_percent = n / sum(n))
 
 ```
 ```{r}
 number_nativness_df <- 
   number_nativness_df %>%
-  group_by(park_name) %>%
-  mutate(native_prop = n/sum(n)) %>%
   mutate(group = if_else(park_name =="Great Smoky Mountains" | park_name == "Grand Canyon" | park_name == "Zion" | park_name == "Yellowstone" | park_name == "Rocky Mountain", "top5", 
                          if_else(park_name =="Glacier" | park_name == "Cuyahoga Valley" | park_name == "Indiana Dunes" | park_name == "Hot Springs" | park_name == "Bryce Canyon", "bottom5", "middle")))
 ```
 ``` {r hypothesis_nativeness}
 set.seed(221)
-null_dist_nativeness <- number_nativness_df %>%
-  filter(group != "middle") %>%
- specify(response = nativeness, explanatory = group,
- success = "Native") %>%
+null_dist_nativeness <- 
+  number_nativness_df %>%
+  filter(group != "middle", nativeness == "Non-native") %>%
+ specify(response = native_percent, explanatory = group) %>%
  hypothesize(null = "independence") %>%
- generate(100, type = "bootstrap") %>%
- calculate(stat = "diff in props",
- order = c("top5", "bottom5"))
-
+ generate(500, type = "bootstrap") %>%
+ calculate(stat = "diff in means",
+ order = c("bottom5", "top5"))
+```
+```{r}
 ggplot(null_dist_nativeness, mapping = aes(x = stat)) +
- geom_histogram(binwidth = 0.05) +
+ geom_histogram(binwidth = 0.01) +
  labs(title = "Null distribution")
+```
+```{r}
+null_dist_nativeness %>%
+ filter(stat > 0) %>%
+ summarise(p_value = n()/nrow(null_dist_nativeness))
+```
+
+```{r}
+most_visited_nps_species_data_cleaned %>%
+  filter(!is.na(nativeness)) %>%
+  ggplot(mapping = aes(y = fct_rev(park_name), #reverses order to put 1 on top
+                       fill = fct_rev(nativeness))) +
+  geom_bar(position = "fill") +
+  labs(title = "Percent Nativness of All Species in National Parks", x = "Percent", y = "Park") +
+  theme_minimal()
+```
+
+Look at top 3 categories of observations (Go back to observations not evidences)
+
+```{r}
+most_visited_nps_species_data_cleaned %>%
+  filter(!park_name == "Acadia") %>%   #removes due to unusual amounts of insects
+  group_by(category_name) %>%
+  summarise(total_observations = sum(observations)) %>%
+  arrange(-total_observations)
+```
+```{r}
+most_visited_nps_species_data_cleaned %>%
+  filter(category_name == "Bird" | category_name == "Vascular Plant" | category_name == "Mammal",
+         !park_name == "Acadia") %>% #Acadia removed from graphic since the insect count was an outlier and scrunching the graph 
+  group_by(park_name, category_name) %>%
+  summarize(total_evidences = sum(evidences, na.rm = TRUE)) %>%
+  ggplot(mapping = aes(y = fct_rev(park_name), fill = category_name, x = total_evidences)) +
+  geom_col() +
+  facet_wrap(~category_name, scales = "free_x") +
+  theme_minimal() + 
+  labs(title = "Total Evidences by Park for the Top 3 Categories", subtitle = "Excluding Acadia", x = "Count", y = "", fill = "Category") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+Hypothesis testing evidences:
+```{r}
+observations_df <- 
+  most_visited_nps_species_data_cleaned %>%
+  select(park_name, category_name, observations, evidences) %>% #selects only relevant categories
+  filter(category_name == "Bird" | category_name == "Vascular Plant" | category_name == "Mammal") %>%
+  group_by(category_name, park_name) %>%
+  summarise(total_evidences = sum(evidences))
+
+```
+```{r}
+set.seed(144)
+null_dist_observations_bird <- 
+  observations_df %>%
+  filter(category_name == "Bird", park_name != "Acadia") %>%
+   mutate(park_numeric = as.numeric(fct_inorder(park_name))) %>%
+  specify(response = total_evidences, explanatory = as.numeric(park_numeric)) %>%
+  hypothesize(null = "independence") %>%
+  generate(reps = 500, type = "permute") %>%
+  calculate(stat = "correlation")
+```
+```{r}
+ggplot(null_dist_observations_bird, mapping = aes(x = stat)) +
+ geom_histogram(binwidth = 0.1) +
+ labs(title = "Null distribution")
+```
+```{r}
+null_dist_observations_bird %>%
+ filter(stat > 0) %>%
+ summarise(p_value = n()/nrow(null_dist_observations_bird))
+```
+
+Mammals:
+```{r}
+set.seed(144)
+null_dist_observations_mammals <- 
+  observations_df %>%
+  filter(category_name == "Mammal", park_name != "Acadia") %>%
+   mutate(park_numeric = as.numeric(fct_inorder(park_name))) %>%
+  specify(response = total_evidences, explanatory = as.numeric(park_numeric)) %>%
+  hypothesize(null = "independence") %>%
+  generate(reps = 500, type = "permute") %>%
+  calculate(stat = "correlation")
+```
+```{r}
+ggplot(null_dist_observations_mammals, mapping = aes(x = stat)) +
+ geom_histogram(binwidth = 0.1) +
+ labs(title = "Null distribution")
+```
+```{r}
+null_dist_observations_mammals %>%
+ filter(stat > 0) %>%
+ summarise(p_value = n()/nrow(null_dist_observations_mammals))
+```
+
+Vascular Plants:
+```{r}
+set.seed(144)
+null_dist_observations_plants <- 
+  observations_df %>%
+  filter(category_name == "Vascular Plant", park_name != "Acadia") %>%
+   mutate(park_numeric = as.numeric(fct_inorder(park_name))) %>%
+  specify(response = total_evidences, explanatory = as.numeric(park_numeric)) %>%
+  hypothesize(null = "independence") %>%
+  generate(reps = 500, type = "permute") %>%
+  calculate(stat = "correlation")
+```
+```{r}
+ggplot(null_dist_observations_plants, mapping = aes(x = stat)) +
+ geom_histogram(binwidth = 0.1) +
+ labs(title = "Null distribution")
+```
+```{r}
+null_dist_observations_plants %>%
+ filter(stat > 0) %>%
+ summarise(p_value = n()/nrow(null_dist_observations_plants))
 ```
