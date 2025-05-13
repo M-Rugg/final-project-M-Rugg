@@ -4,23 +4,77 @@ Moriah Ruggerio
 
 ## Summary
 
-Write-up of your project and findings go here. Think of this as the text
-of your presentation. The length should be roughly 5 minutes when read
-out loud. Although pacing varies, a 5-minute speech is roughly 750
-words. To use the word count addin, select the text you want to count
-the words of (probably this is the Summary section of this document, go
-to Addins, and select the `Word count` addin). This addin counts words
-using two different algorithms, but the results should be similar and as
-long as you’re in the ballpark of 750 words, you’re good! The addin will
-ignore code chunks and only count the words in prose.
+This project uses the dataset most_visited_nps_species_data_cleaned. The
+National Park Service (NPS) keeps a list of every species found within
+each national park. The data used in this project is originally from the
+National Park Species List. It can be accessed here:
+<https://irma.nps.gov/NPSpecies/Search/SpeciesList>. Due to the massive
+size of this dataset, it was restricted to the top 15 most popular
+national parks by f. hull in the tidytuesday git repository on September
+2, 2024. This reduced dataset (most_visited_nps_species_data) was
+accessed on March 15, 2025 from
+<https://github.com/rfordatascience/tidytuesday/blob/main/data/2024/2024-10-08/readme.md>.
+Since this dataset originally had too many for the confines of this
+assignment, I restricted the scope of the data further. Only included in
+this projects’ dataset (most_visited_nps_species_data_cleaned) are
+species whose presence in the park has been approved by the NPS, have an
+active taxon (current scientific name), and a non-sensitive species
+status. Data on sensitive species is removed from all public access by
+the NPS to protect endangered or fragile species in national parks.
 
-You can also load your data here and present any analysis results /
-plots, but I strongly urge you to keep that to a minimum (maybe only the
-most important graphic, if you have one you can choose). And make sure
-to hide your code with `echo = FALSE` unless the point you are trying to
-make is about the code itself. Your results with proper output and
-graphics go in your presentation, this space is for a brief summary of
-your project.
+The intent of this project is to examine there are any relationships
+between biodiversity and the popularity of a National Park. The specific
+research questions to be examined are: (1) Do more popular parks have
+higher evidences of birds (and other classes)? (2) Are there more native
+species seen in more popular parks than non-natives?
+
+For the first question, the predictor variable was evidences. This was
+the sum of `observations`, `references,` and `vouchers`. This was done
+to account for all forms of “seeing” (i.e. literature) an organism in
+the park. I first turned `park_name` into an ordered factor by park
+popularity. I got the park attendance data from Ard, A. J. (2024, June
+10). “These are the top 15 most visited national parks in the U.S. see
+which ranked no. 1. USA Today.” which can be accessed here:
+<https://www.usatoday.com/picture-gallery/travel/news/2024/06/10/what-is-the-most-visited-national-park-in-the-us-see-the-top-15/74049474007/>.
+Next, I calculated the total number of evidences for each category of
+organisms. When I grouped the categories by park, I discovered that the
+overwhelming majority of insects was from Acadia National Park only. Due
+to this issue, I removed Acadia National Park from the analysis for this
+question. This made vascular plants, birds, and mammals the highest
+evidenced categories. Visually, I displayed this by creating a column
+chart that divided the data by park (with the most popular on the top)
+and was factored to show the 3 main categories. Afterwords, I conducted
+a correlation hypothesis test for each of the 3 categories (birds,
+mammals, and vascular plants) to determine if there was a relationship
+between popularity of a park and the amount of evidence. For all 3
+categories, the null was there is no relationship between park
+popularity and the number of “evidences” in each category. Each test had
+a p-value around 0.5. With this, we were unable to detect a significant
+correlation between park popularity and the number of evidences.
+
+For the second question, the predictor variable was `nativeness` and the
+outcome variable was `park_name`. To make the analysis simpler, I
+grouped the top 5 parks together and the bottom 5 (of the 15 in the
+dataset). Space was left in the middle to give more distance for
+polarization (to make it easier to detect a difference. I then
+calculated the percentage of native species to non-natives for each park
+and conducted a hypothesis test. This tested the differences in means
+(average proportion for the top 5 and bottom 5). A difference in means
+was used instead of a difference in proportions to give each park the
+same weight to avoid the number of species from one park completely
+outweighing the others (like how Acadia did in the previous question).
+The null hypothesis for this test was there is no difference between the
+top 5 parks and the bottom 5 parks in percentage of native species. This
+test had a p-value of 0.27 which was substantially higher than the alpha
+value of 0.05. To visualize the percentage of native species, however, I
+created an ordered percent bar graph. The graph showed the percentage of
+native species for each park ordered by popularity with the most popular
+on the top. Graphically, there may be a light trend towards less popular
+parks having higher levels of nativeness than more popular parks.
+However, more data would be needed to detect a difference as we were
+unable to reject the null hypothesis. For future research, it would be
+helpful to have data on more parks than just the top 15, however, it
+would have to be formatted differently to not overload the dataset.
 
 ## Presentation
 
