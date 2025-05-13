@@ -134,7 +134,84 @@ most_visited_nps_species_data_cleaned %>%
  # theme options: https://ggplot2.tidyverse.org/reference/ggtheme.html
 ```
 ---
+# Hypothesis Testing
+```{r observations_df, include=FALSE}
+observations_df <- 
+  most_visited_nps_species_data_cleaned %>%
+  select(park_name, category_name, observations, evidences) %>% #selects only relevant categories
+  filter(category_name == "Bird" | category_name == "Vascular Plant" | category_name == "Mammal") %>%
+  group_by(category_name, park_name) %>%
+  summarise(total_evidences = sum(evidences))
 
+```
+.pull-left[
+**Birds:**
+```{r bird-p, echo=FALSE}
+set.seed(144)
+null_dist_observations_bird <- 
+  observations_df %>%
+  filter(category_name == "Bird", park_name != "Acadia") %>%
+   mutate(park_numeric = as.numeric(fct_inorder(park_name))) %>%
+  specify(response = total_evidences, explanatory = park_numeric) %>%
+  hypothesize(null = "independence") %>%
+  generate(reps = 500, type = "permute") %>%
+  calculate(stat = "correlation")
+
+null_dist_observations_bird %>%
+ filter(stat > 0) %>%
+ summarise(p_value = n()/nrow(null_dist_observations_bird))
+```
+
+**Mammals:**
+``` {r mammal-p, echo=FALSE}
+set.seed(144)
+null_dist_observations_mammals <- 
+  observations_df %>%
+  filter(category_name == "Mammal", park_name != "Acadia") %>%
+   mutate(park_numeric = as.numeric(fct_inorder(park_name))) %>%
+  specify(response = total_evidences, explanatory = park_numeric) %>%
+  hypothesize(null = "independence") %>%
+  generate(reps = 500, type = "permute") %>%
+  calculate(stat = "correlation")
+
+total_n <- nrow(null_dist_observations_mammals)
+null_dist_observations_mammals %>%
+ filter(stat > 0) %>%
+ summarise(p_value = n()/total_n)
+```
+]
+
+.pull-right[
+**Plants:**
+``` {r plants-p, echo=FALSE}
+set.seed(144)
+null_dist_observations_plants <- 
+  observations_df %>%
+  filter(category_name == "Vascular Plant", park_name != "Acadia") %>%
+   mutate(park_numeric = as.numeric(fct_inorder(park_name))) %>%
+  specify(response = total_evidences, explanatory = park_numeric) %>%
+  hypothesize(null = "independence") %>%
+  generate(reps = 500, type = "permute") %>%
+  calculate(stat = "correlation")
+
+total_n <- nrow(null_dist_observations_plants)
+null_dist_observations_plants %>%
+ filter(stat > 0) %>%
+ summarise(p_value = n()/total_n)
+```
+]
+
+---
+
+class: inverse, middle, center
+
+# Are there more native species (as compared to non-natives) seen in more popular parks than less popular? 
+
+---
+
+
+
+---
 # Layouts
 
 You can use plain text
@@ -157,12 +234,7 @@ or text in two columns $^*$
 
 # Code
 
-```{r boring-regression}
-# a boring regression
-model <- lm(dist ~ speed, data = cars)
-tidy(model)
-glance(model)
-```
+
 
 ---
 
