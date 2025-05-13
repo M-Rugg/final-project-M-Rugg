@@ -1,5 +1,5 @@
 ---
-title: "National Park Speicess"
+title: "National Park Species"
 subtitle: "A Quick Look at Biodiversity"
 author: "Moriah Ruggerio"
 institute: "Houghton University"
@@ -37,15 +37,14 @@ most_visited_nps_species_data_cleaned <- read_csv(file = "../data/most_visited_n
 
 ```
 
-```{r}
+```{r, echo=FALSE}
 style_xaringan(
-  title_slide_background_image = "img/confetti.jpg"
+  title_slide_background_image = "img/yosemite.jpg",
+  title_slide_text_color = "#ffffff" 
 )
+#Image credit: Photo by Kyle Yates on Istock
 ```
 
-
-class: center, middle
----
 
 ## Goal: Determine if there is any relationships between a park's popularity and biodiversity (in the top 15 most popular national parks).
 
@@ -209,8 +208,67 @@ class: inverse, middle, center
 
 ---
 
+# Hypothesis
+
+- Null Hypothesis: There is no difference between the top 5 parks and the bottom 5 parks in percentage of native species.
 
 
+- Alternative Hypothesis: There is a difference between the top 5 parks and the bottom 5 parks in percentage of native species.
+
+--
+- Predictor = group (top_5 or bottom_5)
+
+- Response = native_percent (percent native species)
+---
+#Hypothesis testing
+``` {r number_nativenes, include = FALSE}
+number_nativness_df <- 
+  most_visited_nps_species_data_cleaned %>%
+  group_by(park_name) %>%            # groups by park
+  filter(!is.na(nativeness)) %>%     #removes NA
+  select(park_name, category_name, nativeness) %>%
+  count(nativeness) %>%
+  mutate(native_percent = n / sum(n))
+
+```
+
+```{r top5, include = FALSE}
+number_nativness_df <- 
+  number_nativness_df %>%
+  mutate(group = if_else(park_name =="Great Smoky Mountains" | park_name == "Grand Canyon" | park_name == "Zion" | park_name == "Yellowstone" | park_name == "Rocky Mountain", "top5", 
+                         if_else(park_name =="Glacier" | park_name == "Cuyahoga Valley" | park_name == "Indiana Dunes" | park_name == "Hot Springs" | park_name == "Bryce Canyon", "bottom5", "middle")))
+```
+``` {r hypothesis_nativeness, include = FALSE}
+set.seed(221)
+null_dist_nativeness <- 
+  number_nativness_df %>%
+  filter(group != "middle", nativeness == "Non-native") %>%
+ specify(response = native_percent, explanatory = group) %>%
+ hypothesize(null = "independence") %>%
+ generate(500, type = "bootstrap") %>%
+ calculate(stat = "diff in means",
+ order = c("bottom5", "top5"))
+```
+
+.pull-left[
+```{r natives_graph, fig.width=5, echo=FALSE}
+most_visited_nps_species_data_cleaned %>%
+  filter(!is.na(nativeness)) %>%
+  ggplot(mapping = aes(y = fct_rev(park_name), #reverses order to put 1 on top
+                       fill = fct_rev(nativeness))) +
+  geom_bar(position = "fill") +
+  labs(title = "Percent Nativeness in National Parks", x = "Percent", y = "Park", fill = "") +
+  theme_minimal()
+```
+]
+--
+.pull-right[
+```{r nativeness_p, echo=FALSE}
+null_dist_nativeness %>%
+ filter(stat > 0) %>%
+ summarise(p_value = n()/nrow(null_dist_nativeness))
+```
+]
 ---
 # Layouts
 
@@ -296,7 +354,7 @@ Or you can also include a full page image. See next slide.
 
 ---
 
-background-image: url(https://images.unsplash.com/photo-1535448033526-c0e85c9e6968?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1650&q=80)
+background-image: url(https://www.nationalparks.org/uploads/_1200x630_crop_center-center_82_none/yosemitenp_kyle_yates_istock.jpg?mtime=1655840352)
 
 ---
 
