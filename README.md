@@ -28,15 +28,12 @@ research questions to be examined are: (1) Do more popular parks have
 higher evidences of birds (and other classes)? (2) Are there more native
 species seen in more popular parks than non-natives?
 
-For the first question, the predictor variable was evidences. This was
-the sum of `observations`, `references,` and `vouchers`. This was done
-to account for all forms of “seeing” (i.e. literature) an organism in
-the park. I first turned `park_name` into an ordered factor by park
-popularity. I got the park attendance data from Ard, A. J. (2024, June
-10). “These are the top 15 most visited national parks in the U.S. see
-which ranked no. 1. USA Today.” which can be accessed here:
-<https://www.usatoday.com/picture-gallery/travel/news/2024/06/10/what-is-the-most-visited-national-park-in-the-us-see-the-top-15/74049474007/>.
-Next, I calculated the total number of evidences for each category of
+For the first question, the predictor variable was `park_name` and the
+response was `evidences`. This was the sum of `observations`,
+`references,` and `vouchers`. This was done to account for all forms of
+“seeing” (i.e. literature) an organism in the park. I first turned
+`park_name` into an ordered factor by park popularity (Ard, 2024). Next,
+I calculated the total number of evidences for each category of
 organisms. When I grouped the categories by park, I discovered that the
 overwhelming majority of insects was from Acadia National Park only. Due
 to this issue, I removed Acadia National Park from the analysis for this
@@ -82,11 +79,6 @@ My presentation can be found [here](presentation/presentation.html).
 
 ## Data
 
-Include a citation for your data here. See
-<http://libraryguides.vu.edu.au/c.php?g=386501&p=4347840> for guidance
-on proper citation for datasets. If you got your data off the web, make
-sure to note the retrieval date.
-
 NPSpecies - The National Park Service biodiversity database.
 **<https://irma.nps.gov/npspecies/>. Accessed September 2nd, 2024 **
 
@@ -96,5 +88,12 @@ on March 15, 2025.**
 
 ## References
 
-List any references here. You should, at a minimum, list your data
-source.
+Ard, A. J. (2024, June 10). These are the top 15 most visited national
+parks in the U.S. see which ranked no. 1. USA Today.
+<https://www.usatoday.com/picture-gallery/travel/news/2024/06/10/what-is-the-most-visited-national-park-in-the-us-see-the-top-15/74049474007/>.
+
+NPSpecies - The National Park Service biodiversity database.
+**<https://irma.nps.gov/npspecies/>. Accessed September 2nd, 2024 **
+**This data was accessed from
+<https://github.com/rfordatascience/tidytuesday/blob/main/data/2024/2024-10-08/readme.md>
+on March 15, 2025.**
