@@ -1,7 +1,7 @@
 ---
-title: "Presentation title"
-subtitle: "Presentation subtitle (if any)"
-author: "Your Name"
+title: "National Park Speicess"
+subtitle: "A Quick Look at Biodiversity"
+author: "Moriah Ruggerio"
 institute: "Houghton University"
 date: "`r Sys.Date()`"
 output:
@@ -22,6 +22,8 @@ library(tidymodels)
 library(palmerpenguins)
 library(knitr)
 library(xaringanthemer)
+library(skimr)
+library(infer)
 ```
 
 ```{r setup, include=FALSE}
@@ -31,6 +33,8 @@ knitr::opts_chunk$set(fig.retina = 3, dpi = 300, fig.width = 6, fig.asp = 0.618,
 
 ```{r load-data, include=FALSE}
 # Load your data here
+most_visited_nps_species_data_cleaned <- read_csv(file = "../data/most_visited_nps_species_data_cleaned.csv")
+
 ```
 
 ```{r}
@@ -41,41 +45,94 @@ style_xaringan(
 
 
 class: center, middle
+---
 
-## A statement of the overall goal / research question
+## Goal: Determine if there is any relationships between a park's popularity and biodiversity (in the top 15 most popular national parks).
+
+--
+## (1) Do more popular parks have higher evidences of birds (and other classes)?
+
+--
+## (2) Are there more native species seen in more popular parks than non-natives?
 
 ---
 
 class: inverse, center, middle
 
-# Section title
+# Setting Up the Data
 
 ---
 
-# Hello World
+# Evidences
 
-- Click the `Knit` button to compile your presentation
+- Sum of `observations`, `references`, `vouchers`
 
-- Make sure to commit and push all resulting files to your GitHub repo
+- Compilation of counts of evidences for a species
+
+---
+
+# Park_name
+
+- Converted into a factor
+
+- Ordered by park popularity
 
 ---
 
 class: inverse, middle, center
 
-# Using xaringan
+# Do more popular parks have higher evidences of birds (and other classes)?
 
 ---
 
-# xaringan
+# Hypothesis
 
-- The presentation is created using the `xaringan` package
+- Null Hypothesis: There is no relationship between park popularity and the number of “evidences” in each category.
 
-- Use `---` to separate slides and `--` for incremental builds
+
+- Alternative Hypothesis: There is no relationship between park popularity and the number of “evidences” in each category.
 
 --
+- Predictor = park_name (park popularity)
 
-- Like this
+- Explanatory = evidences
+---
+``` {r park_popularity, include=FALSE}
+park_popularity <- c("Great Smoky Mountains", "Grand Canyon", "Zion", "Yellowstone", "Rocky Mountain", "Yosemite", "Acadia", "Grand Teton", "Joshua Tree", "Olympic", "Glacier", "Cuyahoga Valley", "Indiana Dunes", "Hot Springs", "Bryce Canyon")
 
+#park attendance data from: 
+#  Ard, A. J. (2024, June 10). These are the top 15 most visited national parks in the U.S. see which ranked no. 1. USA Today. https://www.usatoday.com/picture-gallery/travel/news/2024/06/10/what-is-the-most-visited-national-park-in-the-us-see-the-top-15/74049474007/ 
+
+most_visited_nps_species_data_cleaned <- most_visited_nps_species_data_cleaned %>%
+  mutate(
+    park_name = gsub("National Park", "", park_name), # removed "National Park" in park_name since it is redundant
+    park_name = factor(park_name, levels = park_popularity) # creates a factor
+    ) #%>% 
+  #count(park_name)       # checks order
+
+#most_visited_nps_species_data_cleaned %>%
+  #filter(!is.na(nativeness_tags))  # may want to combine nativeness with nativeness_tags
+```
+
+```{r plot-chunk, echo=FALSE, fig.align='center', out.width='100%'}
+
+
+# Code hidden with echo = FALSE
+# Uses modified iris dataset from previous chunk
+# Play around with height and width until you're happy with the look
+most_visited_nps_species_data_cleaned %>%
+  filter(category_name == "Bird" | category_name == "Vascular Plant" | category_name == "Mammal",
+         !park_name == "Acadia") %>% #Acadia removed from graphic since the insect count was an outlier and scrunching the graph 
+  group_by(park_name, category_name) %>%
+  summarize(total_evidences = sum(evidences, na.rm = TRUE), .groups = "drop") %>%
+  ggplot(mapping = aes(y = fct_rev(park_name), fill = category_name, x = total_evidences)) +
+  geom_col() +
+  facet_wrap(~category_name, scales = "free_x") +
+  theme_minimal() + 
+  labs(title = "Total Evidences by Park for the Top 3 Categories", subtitle = "Excluding Acadia", x = "Count", y = "", fill = "Category") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+ # theme options: https://ggplot2.tidyverse.org/reference/ggtheme.html
+```
 ---
 
 # Layouts
