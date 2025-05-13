@@ -204,7 +204,7 @@ most_visited_nps_species_data_cleaned %>%
   ggplot(mapping = aes(y = fct_rev(park_name), #reverses order to put 1 on top
                        fill = fct_rev(nativeness))) +
   geom_bar(position = "fill") +
-  labs(title = "Percent Nativness of All Species in National Parks", x = "Percent", y = "Park") +
+  labs(title = "Percent Nativeness of All Species in National Parks", x = "Percent", y = "Park", fill = "") +
   theme_minimal()
 ```
 
@@ -214,8 +214,8 @@ Look at top 3 categories of observations (Go back to observations not evidences)
 most_visited_nps_species_data_cleaned %>%
   filter(!park_name == "Acadia") %>%   #removes due to unusual amounts of insects
   group_by(category_name) %>%
-  summarise(total_observations = sum(observations)) %>%
-  arrange(-total_observations)
+  summarise(total_evidences = sum(evidences)) %>%
+  arrange(-total_evidences)
 ```
 ```{r}
 most_visited_nps_species_data_cleaned %>%
@@ -308,4 +308,8 @@ ggplot(null_dist_observations_plants, mapping = aes(x = stat)) +
 null_dist_observations_plants %>%
  filter(stat > 0) %>%
  summarise(p_value = n()/nrow(null_dist_observations_plants))
+```
+
+``` {r}
+write_csv(most_visited_nps_species_data_cleaned, file = "data/most_visited_nps_species_data_cleaned.csv")
 ```
